@@ -1,15 +1,15 @@
 import json
+from http import HTTPStatus
 from typing import Any
 
 import pytest
-from litestar.status_codes import HTTP_200_OK
 from litestar.testing import AsyncTestClient
 
 
-class TestChatCompletionBasic:
+class TestChatCompletion:
     """Basic tests for chat completion endpoint."""
 
-    async def test_chat_completion_non_streaming(
+    async def test_chat_completion(
         self, test_client: AsyncTestClient, base_chat_request: dict[str, Any]
     ) -> None:
         """Test chat completion without streaming."""
@@ -17,7 +17,7 @@ class TestChatCompletionBasic:
 
         response = await test_client.post("/v1/chat/completions", json=payload)
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTPStatus.CREATED
 
         data = response.json()
         assert data["object"] == "chat.completion"
@@ -33,7 +33,7 @@ class TestChatCompletionBasic:
         """Test the structure of the choice in the response."""
         response = await test_client.post("/v1/chat/completions", json=simple_chat_request)
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTPStatus.CREATED
 
         data = response.json()
         choice = data["choices"][0]
@@ -56,8 +56,8 @@ class TestChatCompletionStreaming:
 
         response = await test_client.post("/v1/chat/completions", json=payload)
 
-        assert response.status_code == HTTP_200_OK
-        assert response.headers.get("content-type") == "text/plain; charset=utf-8"
+        assert response.status_code == HTTPStatus.CREATED
+        assert response.headers.get("content-type") == "application/json"
 
         # Check that response is streaming
         content = response.text
@@ -72,7 +72,7 @@ class TestChatCompletionStreaming:
 
         response = await test_client.post("/v1/chat/completions", json=payload)
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTPStatus.CREATED
 
         # Parse streaming chunks
         content = response.text
@@ -99,7 +99,7 @@ class TestChatCompletionStreaming:
 
         response = await test_client.post("/v1/chat/completions", json=payload)
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTPStatus.CREATED
 
         # Extract content chunks
         content = response.text
@@ -130,11 +130,11 @@ class TestChatCompletionStreaming:
 
         response = await test_client.post("/v1/chat/completions", json=payload)
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTPStatus.CREATED
 
         if stream_value:
             # Streaming mode
-            assert response.headers.get("content-type") == "text/plain; charset=utf-8"
+            assert response.headers.get("content-type") == "application/json"
             assert "data:" in response.text
             assert "[DONE]" in response.text
         else:

@@ -1,4 +1,5 @@
-from litestar.status_codes import HTTP_422_UNPROCESSABLE_ENTITY
+from http import HTTPStatus
+
 from litestar.testing import AsyncTestClient
 
 
@@ -14,7 +15,7 @@ class TestChatCompletionValidation:
         }
         response = await test_client.post("/v1/chat/completions", json=invalid_model_request)
 
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_empty_messages(self, test_client: AsyncTestClient) -> None:
         """Test with empty messages list."""
@@ -25,7 +26,7 @@ class TestChatCompletionValidation:
         }
         response = await test_client.post("/v1/chat/completions", json=empty_messages_request)
 
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_invalid_message_role(self, test_client: AsyncTestClient) -> None:
         """Test with invalid message role."""
@@ -36,7 +37,7 @@ class TestChatCompletionValidation:
         }
         response = await test_client.post("/v1/chat/completions", json=invalid_role_request)
 
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_missing_model_field(self, test_client: AsyncTestClient) -> None:
         """Test with missing model field."""
@@ -45,7 +46,7 @@ class TestChatCompletionValidation:
         }
 
         response = await test_client.post("/v1/chat/completions", json=payload)
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_missing_messages_field(self, test_client: AsyncTestClient) -> None:
         """Test with missing messages field."""
@@ -54,7 +55,7 @@ class TestChatCompletionValidation:
         }
 
         response = await test_client.post("/v1/chat/completions", json=payload)
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_invalid_message_structure(self, test_client: AsyncTestClient) -> None:
         """Test with invalid message structure."""
@@ -64,7 +65,7 @@ class TestChatCompletionValidation:
         }
 
         response = await test_client.post("/v1/chat/completions", json=payload)
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_missing_message_content(self, test_client: AsyncTestClient) -> None:
         """Test with missing message content."""
@@ -74,7 +75,7 @@ class TestChatCompletionValidation:
         }
 
         response = await test_client.post("/v1/chat/completions", json=payload)
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_empty_message_content(self, test_client: AsyncTestClient) -> None:
         """Test with empty message content."""
@@ -85,15 +86,25 @@ class TestChatCompletionValidation:
 
         response = await test_client.post("/v1/chat/completions", json=payload)
         # Empty content should be allowed, test that it doesn't crash
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+    async def test_empty_role(self, test_client: AsyncTestClient) -> None:
+        """Test with empty role."""
+        payload = {
+            "model": "dummy-model:1.0",
+            "messages": [{"role": "", "content": "Hello"}],
+        }
+
+        response = await test_client.post("/v1/chat/completions", json=payload)
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     async def test_invalid_stream_type(self, test_client: AsyncTestClient) -> None:
         """Test with invalid stream parameter type."""
         payload = {
             "model": "dummy-model:1.0",
             "messages": [{"role": "user", "content": "Hello"}],
-            "stream": "true",
+            "stream": "ok",
         }
 
         response = await test_client.post("/v1/chat/completions", json=payload)
-        assert response.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY

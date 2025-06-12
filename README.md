@@ -1,3 +1,166 @@
+ollaix/
+    ├── compose.yml
+    ├── pyproject.toml
+    ├── src/
+    │   ├── __init__.py
+    │   ├── main.py
+    │   ├── config/
+    │   │   ├── __init__.py
+    │   │   └── settings.py
+    │   ├── controllers/
+    │   │   ├── __init__.py
+    │   │   └── chat_controller.py
+    │   ├── schemas/
+    │   │   ├── __init__.py
+    │   │   └── chat_schemas.py
+    │   └── services/
+    │       ├── __init__.py
+    │       ├── ai_service_interface.py
+    │       ├── dummy_service.py
+    │       ├── gemini_service.py
+    │       └── ollama_service.py
+    └── tests/
+        ├── __init__.py
+        ├── conftest.py
+        ├── test_chat_completion.py
+        ├── test_chat_validation.py
+        ├── test_health.py
+        └── test_models.py
+
+
+================================================
+FILE: pyproject.toml
+================================================
+[project]
+name = "aix"
+version = "0.1.0"
+description = "AI project "
+authors = [
+    {name = "Macktireh", email = "abdimack97@gmail.com"},
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.13"
+dependencies = [
+    "google-genai>=1.18.0",
+    "litestar[standard]>=2.16.0",
+    "ollama>=0.5.1",
+    "python-dotenv>=1.1.0",
+]
+
+[dependency-groups]
+lint = [
+]
+test = [
+    "pytest>=8.4.0",
+    "pytest-cov>=6.2.0",
+    "pytest-asyncio>=1.0.0",
+]
+
+[tool.pdm.scripts]
+dev = {cmd = "litestar --app=src.main:app run --reload --host localhost", env = {PYTHONPATH = "src"}}
+test = {cmd = "pytest", env = {PYTHONPATH = "src"}}
+
+
+================================================
+FILE: src/main.py
+================================================
+from litestar import Litestar, get
+from litestar.config.cors import CORSConfig
+
+from config.settings import openapi_config
+from controllers import chat_router
+
+
+@get("/health", summary="Health Check", description="Vérifie la santé de l'API", tags=["Health"])
+async def health_check() -> dict[str, str]:
+    return {"status": "healthy", "service": "Ollaix API"}
+
+
+cors_config = CORSConfig(allow_origins=["*"])
+
+
+app = Litestar(
+    route_handlers=[health_check, chat_router],
+    openapi_config=openapi_config,
+    debug=True,
+    cors_config=cors_config,
+)
+
+================================================
+FILE: tests/conftest.py
+================================================
+from collections.abc import AsyncIterator
+from typing import Any
+
+import pytest
+from litestar.testing import AsyncTestClient
+
+from src.main import app
+
+
+@pytest.fixture(scope="function")
+async def test_client() -> AsyncIterator[AsyncTestClient]:
+    """Fixture to create an asynchronous test client."""
+    async with AsyncTestClient(app=app) as client:
+        yield client
+
+j'obtiens cet erreur :
+```
+PS E:\develop\projects\side\ollaix> pdm run test
+====================================================== test session starts ======================================================
+platform win32 -- Python 3.13.2, pytest-8.4.0, pluggy-1.6.0
+rootdir: E:\develop\projects\side\ollaix
+configfile: pyproject.toml
+plugins: anyio-4.9.0, Faker-37.3.0, asyncio-1.0.0, cov-6.2.0
+asyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 1 item
+
+tests\test_health.py F                                                                                                     [100%]
+
+=========================================================== FAILURES ============================================================
+_____________________________________________ TestHealthEndpoint.test_health_check ______________________________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+======================================================= warnings summary ========================================================
+.venv\Lib\site-packages\litestar\openapi\config.py:197
+  E:\develop\projects\side\ollaix\.venv\Lib\site-packages\litestar\openapi\config.py:197: DeprecationWarning: Use of deprecated attribute 'root_schema_site'. Deprecated in litestar v2.8.0. This attribute will be removed in v3.0.0. Use 'render_plugins' instead. Any 'render_plugin' with path '/' or first 'render_plugin' in list will be served at the OpenAPI root.
+    warn_deprecation(
+
+tests/test_health.py::TestHealthEndpoint::test_health_check
+  E:\develop\projects\side\ollaix\.venv\Lib\site-packages\_pytest\fixtures.py:1181: PytestRemovedIn9Warning: 'test_health_check' requested an async fixture 'test_client', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
+  See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+==================================================== short test summary info ====================================================
+FAILED tests/test_health.py::TestHealthEndpoint::test_health_check - Failed: async def functions are not natively supported.
+================================================= 1 failed, 2 warnings in 0.24s =================================================
+```
+
+================================================
+FILE: tests/test_health.py
+================================================
+from litestar.status_codes import HTTP_200_OK
+from litestar.testing import AsyncTestClient
+
+
+class TestHealthEndpoint:
+    """Tests for the health endpoint."""
+
+    async def test_health_check(self, test_client: AsyncTestClient) -> None:
+        """Test the health check endpoint."""
+        response = await test_client.get("/health")
+        data = response.json()
+
+        assert response.status_code == HTTP_200_OK
+        assert data["status"] == "healthy"
+
 Voici mon API créer avec le framwork [litestar](https://github.com/litestar-org/litestar). Ajoute moi les tests intégration des endpoints. Pour l'endpoint de chat completion, j'ai ajouté le support du streaming si le paramètre `stream=True` est présent dans la requête donc il faudra tester avec et sans streaming. Pour tester tu vas utiliser le modèle `dummy-model:1.0`, j'ai ajouté un DummyService qui retourne des textes aléatoires et qui implement bien `AIServiceInterface` comme OllamaService. Voici le payload de la requête pour tester :
 
 ```json
@@ -52,7 +215,9 @@ Voici mon code de l'api :
 # main.py
 from litestar import Litestar, get
 from litestar.config.cors import CORSConfig
+from litestar.exceptions import HTTPException, ImproperlyConfiguredException, ValidationException
 
+from config.exception_handler import app_exception_handler
 from config.settings import openapi_config
 from controllers import chat_router
 
@@ -70,38 +235,54 @@ app = Litestar(
     openapi_config=openapi_config,
     debug=True,
     cors_config=cors_config,
+    exception_handlers={
+        HTTPException: app_exception_handler,
+        ImproperlyConfiguredException: app_exception_handler,
+        ValidationException: app_exception_handler,
+    },
 )
 
 
+
 # config/settings.py
-import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 from litestar.openapi import OpenAPIConfig
+from litestar.openapi.plugins import ScalarRenderPlugin
 from litestar.openapi.spec import Contact, Tag
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+from config.env import get_env_var
+
+# Define the base directory of the project
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Load environment variables from .env file
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
-# Configuration des services AI
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# List of allowed origins for CORS (Cross-Origin Resource Sharing)
+CORS_ALLOWED_ORIGINS = get_env_var("CORS_ALLOWED_ORIGINS", "*").split(",")
 
-# Configuration OpenAPI
+# Base URL for the Ollama API
+OLLAMA_BASE_URL = get_env_var("OLLAMA_BASE_URL", "http://localhost:11434")
+
+# API key for the Gemini model
+GEMINI_API_KEY = get_env_var("GEMINI_API_KEY")
+
+# OpenAPI configuration
 openapi_config = OpenAPIConfig(
     title="Ollaix API",
     version="1.0.0",
-    description="API unifiée pour les modèles de chat completion Ollama et Gemini",
+    description="Unified API for Ollama and Gemini chat completion models",
     contact=Contact(name="Ollaix Team", email="contact@ollaix.com"),
     path="/",
-    root_schema_site="swagger",
     tags=[
-        # Tag(name="Models", description="Gestion des modèles de langage disponibles"),
-        Tag(name="Chat", description="Endpoints de chat completion avec support du streaming"),
-        Tag(name="Health", description="Endpoints de santé et de monitoring"),
+        Tag(name="Chat", description="Chat completion endpoints with streaming support"),
+        Tag(name="Health", description="Health check and monitoring endpoints"),
     ],
+    render_plugins=[ScalarRenderPlugin()],
 )
+
 
 
 # schemas/chat_schemas.py
@@ -212,6 +393,7 @@ from typing import Annotated
 
 from litestar import get, post
 from litestar.controller import Controller
+from litestar.exceptions import ValidationException
 from litestar.params import Body
 from litestar.response import Stream
 
@@ -229,59 +411,78 @@ class ChatController(Controller):
 
     @get(
         "/models",
-        summary="Lister les modèles disponibles",
-        description="Retourne la liste de tous les modèles de langage disponibles",
+        summary="List available models",
+        description="Returns a list of all available language models from supported services.",
     )
     async def get_available_models(self) -> ModelsResponse:
-        """Récupère la liste des modèles disponibles depuis tous les services."""
+        """Fetches all available language models from the registered AI services."""
         return AIServiceInterface.get_all_models()
 
     @post(
         "/chat/completions",
         summary="Chat completion",
-        description="Génère une réponse de chat completion avec support du streaming",
+        description="Generates a chat completion response with optional streaming support.",
     )
     async def chat_completion(
         self,
         data: Annotated[
             ChatCompletionRequest,
             Body(
-                title="Requête de chat completion",
-                description="Données de la requête pour générer une réponse de chat",
+                title="Chat completion request",
+                description="Payload containing the chat messages and model configuration.",
             ),
         ],
         ollama_service: AIServiceInterface,
         gemini_service: AIServiceInterface,
+        dummy_service: AIServiceInterface,
     ) -> Stream | ChatCompletionResponse:
         """
-        Génère une réponse de chat completion.
+        Generates a response for a chat completion request.
 
-        Supporte le streaming si stream=True dans la requête.
-        Route automatiquement vers le service approprié basé sur le modèle.
+        Supports streaming if `stream=True` is provided in the request.
+        Automatically routes to the appropriate backend service based on the requested model.
         """
-        service = self._get_service_for_model(data.model, ollama_service, gemini_service)
+        if not data.messages:
+            raise ValidationException("Messages list cannot be empty.")
+
+        for message in data.messages:
+            if not message.content:
+                raise ValidationException("Message content cannot be empty.")
+            if not message.role:
+                raise ValidationException("Message role cannot be empty.")
+
+        if not isinstance(data.stream, bool):
+            raise ValidationException("Stream parameter must be a boolean.")
+
+        service = self._get_service_for_model(
+            data.model, ollama_service, gemini_service, dummy_service
+        )
 
         if data.stream:
-            return Stream(service.chat_completion_stream(data)) # type: ignore
-        else:
-            return await service.chat_completion(data)
+            return Stream(service.chat_completion_stream(data))  # type: ignore
+        return await service.chat_completion(data)
 
     def _get_service_for_model(
         self,
         model: str,
         ollama_service: AIServiceInterface,
         gemini_service: AIServiceInterface,
+        dummy_service: AIServiceInterface,
     ) -> AIServiceInterface:
-        """Détermine quel service utiliser basé sur le modèle demandé."""
+        """
+        Determines the appropriate AI service to handle the request based on the selected model.
+
+        Raises:
+            ValidationException: If the provided model is not supported by any service.
+        """
         if model in ollama_service.available_models:
             return ollama_service
-        elif model in gemini_service.available_models:
+        if model in gemini_service.available_models:
             return gemini_service
-        else:
-            from litestar.exceptions import ValidationException
+        if model in dummy_service.available_models:
+            return dummy_service
 
-            raise ValidationException(f"Modèle '{model}' non disponible")
-
+        raise ValidationException(f"Model '{model}' is not available.")
 
 
 # services/ai_service_interface.py

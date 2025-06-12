@@ -1,7 +1,7 @@
 import json
-from collections.abc import AsyncGenerator, Generator
+from asyncio import sleep
+from collections.abc import AsyncGenerator
 from random import choice, randint, random
-from time import sleep
 from typing import Any
 
 from schemas.chat_schemas import (
@@ -30,7 +30,7 @@ class DummyService(AIServiceInterface):
             raise ValueError(f"Modèle '{request.model}' non disponible pour DummyService")
 
         # Simulate a delay for the non-streamed response
-        sleep(2)
+        await sleep(2)
 
         # Generate random content
         content = self._generate_dummy_content(word_count=100)
@@ -65,7 +65,7 @@ class DummyService(AIServiceInterface):
 
         # The get_dummy_chat_stream logic is already a Generator
         # It needs to be converted into an AsyncGenerator
-        for chunk_content in self._get_dummy_chat_stream():
+        async for chunk_content in self._get_dummy_chat_stream():
             stream_chunk = ChatCompletionStreamChunk(
                 model=request.model,
                 choices=[
@@ -191,25 +191,117 @@ class DummyService(AIServiceInterface):
         ]
         return " ".join(choice(WORDS).lower() for _ in range(word_count)) + "."
 
-    def _get_dummy_chat_stream(self, **kwargs) -> Generator[str]:
-        sleep(3)
+    async def _get_dummy_chat_stream(self, **kwargs) -> AsyncGenerator[str]:
+        await sleep(1.5)
         WORDS = [
-            "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit",
-            "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore",
-            "magna", "aliqua", "enim", "ad", "minim", "veniam", "quis", "nostrud",
-            "exercitation", "ullamco", "laboris", "nisi", "aliquip", "ex", "ea", "commodo",
-            "consequat", "duis", "aute", "irure", "in", "reprehenderit", "voluptate",
-            "velit", "esse", "cillum", "fugiat", "nulla", "pariatur", "excepteur", "sint",
-            "occaecat", "cupidatat", "non", "proident", "sunt", "culpa", "qui", "officia",
-            "deserunt", "mollit", "anim", "id", "est", "laborum", "solution", "problème",
-            "méthode", "exemple", "important", "noter", "voici", "comment", "fonction",
-            "variable", "classe", "objet", "données", "résultat", "algorithme", "code"
+            "lorem",
+            "ipsum",
+            "dolor",
+            "sit",
+            "amet",
+            "consectetur",
+            "adipiscing",
+            "elit",
+            "sed",
+            "do",
+            "eiusmod",
+            "tempor",
+            "incididunt",
+            "ut",
+            "labore",
+            "et",
+            "dolore",
+            "magna",
+            "aliqua",
+            "enim",
+            "ad",
+            "minim",
+            "veniam",
+            "quis",
+            "nostrud",
+            "exercitation",
+            "ullamco",
+            "laboris",
+            "nisi",
+            "aliquip",
+            "ex",
+            "ea",
+            "commodo",
+            "consequat",
+            "duis",
+            "aute",
+            "irure",
+            "in",
+            "reprehenderit",
+            "voluptate",
+            "velit",
+            "esse",
+            "cillum",
+            "fugiat",
+            "nulla",
+            "pariatur",
+            "excepteur",
+            "sint",
+            "occaecat",
+            "cupidatat",
+            "non",
+            "proident",
+            "sunt",
+            "culpa",
+            "qui",
+            "officia",
+            "deserunt",
+            "mollit",
+            "anim",
+            "id",
+            "est",
+            "laborum",
+            "solution",
+            "problème",
+            "méthode",
+            "exemple",
+            "important",
+            "noter",
+            "voici",
+            "comment",
+            "fonction",
+            "variable",
+            "classe",
+            "objet",
+            "données",
+            "résultat",
+            "algorithme",
+            "code",
         ]
         TECH_WORDS = [
-            "Python", "JavaScript", "React", "Django", "FastAPI", "API", "REST", "JSON",
-            "database", "SQL", "NoSQL", "MongoDB", "PostgreSQL", "Redis", "Docker",
-            "Kubernetes", "microservices", "authentication", "authorization", "JWT",
-            "HTTP", "HTTPS", "SSL", "TLS", "encryption", "hash", "algorithm", "framework"
+            "Python",
+            "JavaScript",
+            "React",
+            "Django",
+            "FastAPI",
+            "API",
+            "REST",
+            "JSON",
+            "database",
+            "SQL",
+            "NoSQL",
+            "MongoDB",
+            "PostgreSQL",
+            "Redis",
+            "Docker",
+            "Kubernetes",
+            "microservices",
+            "authentication",
+            "authorization",
+            "JWT",
+            "HTTP",
+            "HTTPS",
+            "SSL",
+            "TLS",
+            "encryption",
+            "hash",
+            "algorithm",
+            "framework",
         ]
         CODE_EXAMPLES = [
             "```python\ndef example_function():\n    return 'Hello World'\n```",
@@ -217,11 +309,11 @@ class DummyService(AIServiceInterface):
             "```sql\nSELECT * FROM users WHERE active = true;\n```",
             "```bash\nnpm install package-name\npip install requirements.txt\n```",
             "```\nnpm install package-name\npip install requirements.txt\n```",
-            "```json\n{\n  \"status\": \"success\",\n  \"data\": []\n}\n```",
-            '![](https://macktireh.dev/images/mack.png)',  # noqa: E501
-            '![](https://github.com/user-attachments/assets/5ded5a63-89dc-456d-be42-89f28ad92b78)',  # noqa: E501
-            '![](https://github.com/user-attachments/assets/436bbc5e-ca3e-468a-926d-7303aaad42ee)',  # noqa: E501
-            '![](https://github.com/user-attachments/assets/fc5d50c3-248d-4807-b1c1-8d45baddf6da)',  # noqa: E501
+            '```json\n{\n  "status": "success",\n  "data": []\n}\n```',
+            "![](https://macktireh.dev/images/mack.png)",  # noqa: E501
+            "![](https://github.com/user-attachments/assets/5ded5a63-89dc-456d-be42-89f28ad92b78)",  # noqa: E501
+            "![](https://github.com/user-attachments/assets/436bbc5e-ca3e-468a-926d-7303aaad42ee)",  # noqa: E501
+            "![](https://github.com/user-attachments/assets/fc5d50c3-248d-4807-b1c1-8d45baddf6da)",  # noqa: E501
         ]
         HEADINGS = [
             "## Solution proposée",
@@ -233,7 +325,7 @@ class DummyService(AIServiceInterface):
             "### Méthode 1",
             "### Méthode 2",
             "### Alternative",
-            "### Remarque importante"
+            "### Remarque importante",
         ]
         MARKDOWN_ELEMENTS = [
             "**important**",
@@ -251,11 +343,11 @@ class DummyService(AIServiceInterface):
             "- Troisième aspect essentiel",
             "1. Première étape",
             "2. Deuxième étape",
-            "3. Troisième étape"
+            "3. Troisième étape",
         ]
 
         default_word_count = choice(range(150, 200))
-        default_delay = 0.05
+        default_delay = 0.02
 
         try:
             word_count = int(kwargs.get("word_count", default_word_count))
@@ -270,11 +362,39 @@ class DummyService(AIServiceInterface):
         words_generated = 0
 
         THINKING_WORDS = [
-            "analyser", "considérer", "évaluer", "examiner", "réfléchir", "comprendre",
-            "déterminer", "identifier", "explorer", "investigation", "approche", "méthode",
-            "solution", "problème", "question", "aspect", "élément", "facteur", "paramètre",
-            "contexte", "situation", "cas", "scénario", "possibilité", "option", "alternative",
-            "conséquence", "résultat", "impact", "effet", "influence", "importance", "pertinence"
+            "analyser",
+            "considérer",
+            "évaluer",
+            "examiner",
+            "réfléchir",
+            "comprendre",
+            "déterminer",
+            "identifier",
+            "explorer",
+            "investigation",
+            "approche",
+            "méthode",
+            "solution",
+            "problème",
+            "question",
+            "aspect",
+            "élément",
+            "facteur",
+            "paramètre",
+            "contexte",
+            "situation",
+            "cas",
+            "scénario",
+            "possibilité",
+            "option",
+            "alternative",
+            "conséquence",
+            "résultat",
+            "impact",
+            "effet",
+            "influence",
+            "importance",
+            "pertinence",
         ]
         thinking_block = ["<think> "]
         for paragraph in range(3):
@@ -449,13 +569,13 @@ class DummyService(AIServiceInterface):
                 if chunk.startswith(("```", "#", "-", ">", "1.", "2.", "3.", "4.", "5.")):
                     yield chunk
                     # Longer pause for structural elements
-                    sleep(delay * 2)
+                    await sleep(delay * 2)
                 else:
                     # Stream word by word or character by character
                     if len(chunk) > 50:
                         for i in range(0, len(chunk), 10):
                             yield chunk[i : i + 10]
-                            sleep(delay)
+                            await sleep(delay)
                     else:
                         yield chunk
-                        sleep(delay)
+                        await sleep(delay)

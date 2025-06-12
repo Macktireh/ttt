@@ -2,6 +2,7 @@ from typing import Annotated
 
 from litestar import get, post
 from litestar.controller import Controller
+from litestar.exceptions import ValidationException
 from litestar.params import Body
 from litestar.response import Stream
 
@@ -19,25 +20,25 @@ class ChatController(Controller):
 
     @get(
         "/models",
-        summary="Lister les modèles disponibles",
-        description="Retourne la liste de tous les modèles de langage disponibles",
+        summary="List available models",
+        description="Returns a list of all available language models from supported services.",
     )
     async def get_available_models(self) -> ModelsResponse:
-        """Récupère la liste des modèles disponibles depuis tous les services."""
+        """Fetches all available language models from the registered AI services."""
         return AIServiceInterface.get_all_models()
 
     @post(
         "/chat/completions",
         summary="Chat completion",
-        description="Génère une réponse de chat completion avec support du streaming",
+        description="Generates a chat completion response with optional streaming support.",
     )
     async def chat_completion(
         self,
         data: Annotated[
             ChatCompletionRequest,
             Body(
-                title="Requête de chat completion",
-                description="Données de la requête pour générer une réponse de chat",
+                title="Chat completion request",
+                description="Payload containing the chat messages and model configuration.",
             ),
         ],
         ollama_service: AIServiceInterface,
@@ -45,19 +46,30 @@ class ChatController(Controller):
         dummy_service: AIServiceInterface,
     ) -> Stream | ChatCompletionResponse:
         """
-        Génère une réponse de chat completion.
+        Generates a response for a chat completion request.
 
-        Supporte le streaming si stream=True dans la requête.
-        Route automatiquement vers le service approprié basé sur le modèle.
+        Supports streaming if `stream=True` is provided in the request.
+        Automatically routes to the appropriate backend service based on the requested model.
         """
+        if not data.messages:
+            raise ValidationException("Messages list cannot be empty.")
+
+        for message in data.messages:
+            if not message.content:
+                raise ValidationException("Message content cannot be empty.")
+            if not message.role:
+                raise ValidationException("Message role cannot be empty.")
+
+        if not isinstance(data.stream, bool):
+            raise ValidationException("Stream parameter must be a boolean.")
+
         service = self._get_service_for_model(
             data.model, ollama_service, gemini_service, dummy_service
         )
 
         if data.stream:
             return Stream(service.chat_completion_stream(data))  # type: ignore
-        else:
-            return await service.chat_completion(data)
+        return await service.chat_completion(data)
 
     def _get_service_for_model(
         self,
@@ -66,13 +78,17 @@ class ChatController(Controller):
         gemini_service: AIServiceInterface,
         dummy_service: AIServiceInterface,
     ) -> AIServiceInterface:
-        """Détermine quel service utiliser basé sur le modèle demandé."""
+        """
+        Determines the appropriate AI service to handle the request based on the selected model.
+
+        Raises:
+            ValidationException: If the provided model is not supported by any service.
+        """
         if model in ollama_service.available_models:
             return ollama_service
-        elif model in gemini_service.available_models:
+        if model in gemini_service.available_models:
             return gemini_service
-        else:
+        if model in dummy_service.available_models:
             return dummy_service
-            from litestar.exceptions import ValidationException
 
-            raise ValidationException(f"Modèle '{model}' non disponible")
+        raise ValidationException(f"Model '{model}' is not available.")

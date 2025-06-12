@@ -21,8 +21,21 @@ lint = [
 test = [
     "pytest>=8.4.0",
     "pytest-cov>=6.2.0",
+    "pytest-asyncio>=1.0.0",
 ]
 
+[tool.pdm.scripts]
+dev = {cmd = "litestar --app=src.main:app run --reload --host localhost", env = {PYTHONPATH = "src"}}
+test = {cmd = "pytest", env = {PYTHONPATH = "src", GEMINI_API_KEY = "test"}}
+
+
+# Add pytest-asyncio configuration
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 
 [tool.ruff]
 line-length = 110
@@ -68,6 +81,5 @@ select = [
 
 [tool.pdm]
 distribution = false
-[tool.pdm.scripts]
-dev = "litestar --app=src.main:app run --reload --host localhost"
+
 

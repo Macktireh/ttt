@@ -1,6 +1,8 @@
 from litestar import Litestar, get
 from litestar.config.cors import CORSConfig
+from litestar.exceptions import HTTPException, ImproperlyConfiguredException, ValidationException
 
+from config.exception_handler import app_exception_handler
 from config.settings import openapi_config
 from controllers import chat_router
 
@@ -18,4 +20,9 @@ app = Litestar(
     openapi_config=openapi_config,
     debug=True,
     cors_config=cors_config,
+    exception_handlers={
+        HTTPException: app_exception_handler,
+        ImproperlyConfiguredException: app_exception_handler,
+        ValidationException: app_exception_handler,
+    },
 )

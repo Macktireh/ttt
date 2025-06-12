@@ -1,4 +1,5 @@
-from litestar.status_codes import HTTP_200_OK
+from http import HTTPStatus
+
 from litestar.testing import AsyncTestClient
 
 
@@ -10,5 +11,5 @@ class TestHealthEndpoint:
         response = await test_client.get("/health")
         data = response.json()
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTPStatus.OK
         assert data["status"] == "healthy"

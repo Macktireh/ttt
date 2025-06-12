@@ -53,16 +53,3 @@ def chat_request_with_system() -> dict[str, Any]:
         ],
         "stream": False,
     }
-
-
-@pytest.fixture
-def chat_request_with_parameters() -> dict[str, Any]:
-    """Chat request with optional parameters."""
-    return {
-        "model": "dummy-model:1.0",
-        "messages": [{"role": "user", "content": "Hello"}],
-        "stream": False,
-        "max_tokens": 100,
-        "temperature": 0.7,
-        "top_p": 0.9,
-    }

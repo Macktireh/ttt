@@ -1,4 +1,5 @@
-from litestar.status_codes import HTTP_200_OK
+from http import HTTPStatus
+
 from litestar.testing import AsyncTestClient
 
 
@@ -9,7 +10,7 @@ class TestModelsEndpoint:
         """Test retrieving the list of available models."""
         response = await test_client.get("/v1/models")
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTPStatus.OK
 
         data = response.json()
         assert data["object"] == "list"
@@ -20,7 +21,7 @@ class TestModelsEndpoint:
         """Test that the models are present in the list."""
         response = await test_client.get("/v1/models")
 
-        assert response.status_code == HTTP_200_OK
+        assert response.status_code == HTTPStatus.OK
 
         data = response.json()
         model_ids = [model["id"] for model in data["data"]]
