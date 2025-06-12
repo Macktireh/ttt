@@ -1,0 +1,43 @@
+services:
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: /backend/Dockerfile
+  #   image: ollaix_api
+  #   container_name: ollaix_api
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - OLLAMA_ADDRESS=http://ollaix_ollama:11434
+  #   depends_on:
+  #     - ollaix_ollama
+
+  ollaix_ollama:
+    build:
+      context: .
+      dockerfile: /ollama/Dockerfile
+    image: ollaix_ollama
+    container_name: ollaix_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollaix_ollama_volume:/root/.ollama
+
+  # ollama_qwen3_4b:
+  #   build:
+  #     context: .
+  #     dockerfile: /ollama/Dockerfile
+  #     args:
+  #       MODEL_NAME: qwen3:4b
+  #   image: ollaix_ollama_qwen3_4b
+  #   container_name: ollaix_ollama_qwen3_4b
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollaix_ollama_volume:/root/.ollama
+  #   # environment:
+  #   #   - DEBUG=1
+
+volumes:
+  ollaix_ollama_volume:
+    name: ollaix_ollama_volume

@@ -1,0 +1,73 @@
+[project]
+name = "aix"
+version = "0.1.0"
+description = "AI project "
+authors = [
+    {name = "Macktireh", email = "abdimack97@gmail.com"},
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.13"
+dependencies = [
+    "google-genai>=1.18.0",
+    "litestar[standard]>=2.16.0",
+    "ollama>=0.5.1",
+    "python-dotenv>=1.1.0",
+]
+
+[dependency-groups]
+lint = [
+]
+test = [
+    "pytest>=8.4.0",
+    "pytest-cov>=6.2.0",
+]
+
+
+[tool.ruff]
+line-length = 110
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+
+
+[tool.pdm]
+distribution = false
+[tool.pdm.scripts]
+dev = "litestar --app=src.main:app run --reload --host localhost"
+
