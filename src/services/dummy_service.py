@@ -306,10 +306,9 @@ class DummyService(AIServiceInterface):
             "```bash\nnpm install package-name\npip install requirements.txt\n```",
             "```\nnpm install package-name\npip install requirements.txt\n```",
             '```json\n{\n  "status": "success",\n  "data": []\n}\n```',
-            "![](https://macktireh.dev/images/mack.png)",  # noqa: E501
-            "![](https://github.com/user-attachments/assets/5ded5a63-89dc-456d-be42-89f28ad92b78)",  # noqa: E501
-            "![](https://github.com/user-attachments/assets/436bbc5e-ca3e-468a-926d-7303aaad42ee)",  # noqa: E501
-            "![](https://github.com/user-attachments/assets/fc5d50c3-248d-4807-b1c1-8d45baddf6da)",  # noqa: E501
+            "![1](https://github.com/user-attachments/assets/382225ab-abdc-49ad-8497-d3d5b5c7043a)",  # noqa: E501
+            "![2](https://github.com/user-attachments/assets/d9e53e85-0f06-4c80-826e-8a69d26bcc7a)",  # noqa: E501
+            "![3](https://github.com/user-attachments/assets/48dabfe0-18e3-4d04-b526-9667772aefd1)",  # noqa: E501
         ]
         HEADINGS = [
             "## Solution proposée",

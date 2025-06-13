@@ -1,7 +1,7 @@
 [project]
 name = "ollaix"
 version = "0.1.0"
-description = "AI project "
+description = ""
 authors = [
     { name = "Macktireh", email = "abdimack97@gmail.com" }
 ]
@@ -28,6 +28,9 @@ test = [
 [tool.pdm.scripts]
 dev = { cmd = "litestar --app=src.main:app run --reload --host localhost", env = { PYTHONPATH = "src" } }
 test = { cmd = "pytest", env = { PYTHONPATH = "src", GEMINI_API_KEY = "test" } }
+ruffformat = "ruff format"
+ruffcheck = "ruff check --fix"
+ruff = { composite = ["ruffformat", "ruffcheck"] }
 
 
 [tool.pytest.ini_options]
@@ -38,7 +41,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 
 [tool.ruff]
-line-length = 110
+line-length = 99
 exclude = [
     ".bzr",
     ".direnv",
