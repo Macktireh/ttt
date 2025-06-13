@@ -1,0 +1,55 @@
+ARG PYTHON_BASE=3.13.5-slim-bookworm
+
+# base image for Python
+FROM docker.io/python:$PYTHON_BASE AS python_image
+
+#############################################################################################
+# -------------------------------------- build stage -------------------------------------- #
+#############################################################################################
+FROM python_image AS builder
+
+# set work directory
+WORKDIR /project
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
+  # dependencies for building Python packages
+  build-essential \
+  # psycopg dependencies
+  libpq-dev && \
+  # install PDM
+  pip install -U pdm
+
+ENV PDM_CHECK_UPDATE=false
+
+COPY pyproject.toml pyproject.toml
+COPY pdm.lock pdm.lock
+
+# install dependencies and project into the local packages directory
+RUN pdm install --prod --no-editable
+
+#############################################################################################
+# -------------------------------------- final stage -------------------------------------- #
+#############################################################################################
+FROM python_image AS final
+
+WORKDIR /project
+
+WORKDIR /project
+
+RUN apt-get update && apt-get install --no-install-recommends -y
+
+RUN addgroup --system app && adduser --system --group app
+USER app
+
+COPY --from=builder project/.venv .venv/
+ENV PATH="/project/.venv/bin:$PATH" \
+  PYTHONPATH="/project"
+
+COPY src/ ./
+
+EXPOSE 8000
+
+ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
