@@ -11,31 +11,31 @@ from schemas.chat_schemas import (
 
 
 class AIServiceInterface(ABC):
-    """Interface abstraite pour les services d'IA."""
+    """Abstract interface for AI services."""
 
     available_models: list[str] = []
     provider_name: str = ""
 
     @abstractmethod
     async def chat_completion(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
-        """Génère une réponse de chat completion."""
+        """Generates a completion chat response."""
         pass
 
     @abstractmethod
     async def chat_completion_stream(
         self, request: ChatCompletionRequest
     ) -> AsyncGenerator[str, Any]:
-        """Génère un stream de réponses de chat completion."""
+        """Generates a stream of completion chat responses."""
         pass
 
     @abstractmethod
     def get_model_info(self) -> list[ModelInfo]:
-        """Retourne les informations des modèles supportés."""
+        """Returns information on supported models."""
         pass
 
     @staticmethod
     def get_all_models() -> ModelsResponse:
-        """Retourne tous les modèles disponibles de tous les services."""
+        """Returns all available models of all services."""
         from services.dummy_service import DummyService
         from services.gemini_service import GeminiService
         from services.ollama_service import OllamaService

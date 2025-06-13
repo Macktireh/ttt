@@ -1,6 +1,6 @@
 import json
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Any, override
 
 from google.genai import Client, types
 from google.genai.errors import APIError
@@ -27,13 +27,13 @@ class GeminiService(AIServiceInterface):
     available_models = ["gemini-2.0-flash"]
     provider_name = "gemini"
 
-    def __init__(self):
+    def __init__(self) -> None:
         if not GEMINI_API_KEY:
             raise ImproperlyConfiguredException("GEMINI_API_KEY is not configured")
         self.client = Client(api_key=GEMINI_API_KEY)
 
+    @override
     async def chat_completion(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
-        """Generates a completion chat response via Gemini."""
         if request.model not in self.available_models:
             raise ValidationException(f"Model '{request.model}' is not available for Gemini")
 
@@ -84,10 +84,10 @@ class GeminiService(AIServiceInterface):
                 detail=e.message if e.message else "Internal Server Error", status_code=e.code
             ) from e
 
+    @override
     async def chat_completion_stream(
         self, request: ChatCompletionRequest
     ) -> AsyncGenerator[str, Any]:
-        """Generates a stream of chat completion responses via Gemini."""
         if request.model not in self.available_models:
             raise ValueError(f"Modèle '{request.model}' non disponible pour Gemini")
 
@@ -142,8 +142,8 @@ class GeminiService(AIServiceInterface):
                 detail=e.message if e.message else "Internal Server Error", status_code=e.code
             ) from e
 
+    @override
     def get_model_info(self) -> list[ModelInfo]:
-        """Returns Gemini model information."""
         return [
             ModelInfo(
                 id="gemini-2.0-flash",

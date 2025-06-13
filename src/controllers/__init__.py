@@ -1,17 +1,6 @@
-from litestar import Router
-from litestar.di import Provide
+from litestar import get
 
-from controllers.chat_controller import ChatController
-from services.dummy_service import DummyService
-from services.gemini_service import GeminiService
-from services.ollama_service import OllamaService
 
-chat_router = Router(
-    path="/v1",
-    dependencies={
-        "gemini_service": Provide(GeminiService, sync_to_thread=False),
-        "ollama_service": Provide(OllamaService, sync_to_thread=False),
-        "dummy_service": Provide(DummyService, sync_to_thread=False),
-    },
-    route_handlers=[ChatController],
-)
+@get("/health", summary="Health Check", description="Checks API health", tags=["Health"])
+async def health_check() -> dict[str, str]:
+    return {"status": "healthy"}

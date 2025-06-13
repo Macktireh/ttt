@@ -8,7 +8,7 @@ from litestar.dto import DataclassDTO
 
 @dataclass
 class ChatMessage:
-    """Représente un message dans une conversation."""
+    """Represents a message in a conversation."""
 
     role: Literal["assistant", "user", "system"]
     content: str
@@ -16,7 +16,7 @@ class ChatMessage:
 
 @dataclass
 class ChatCompletionRequest:
-    """Requête pour une completion de chat."""
+    """Request for cat completion."""
 
     model: str
     messages: list[ChatMessage]
@@ -28,7 +28,7 @@ class ChatCompletionRequest:
 
 @dataclass
 class ChatCompletionResponse:
-    """Réponse d'une completion de chat."""
+    """Response from a cat completion."""
 
     id: UUID = field(default_factory=uuid4)
     object: Literal["chat.completion"] = "chat.completion"
@@ -40,7 +40,7 @@ class ChatCompletionResponse:
 
 @dataclass
 class ChatCompletionStreamChunk:
-    """Chunk de données pour le streaming."""
+    """Data chunk for streaming."""
 
     id: UUID = field(default_factory=uuid4)
     object: Literal["chat.completion.chunk"] = "chat.completion.chunk"
@@ -51,7 +51,7 @@ class ChatCompletionStreamChunk:
 
 @dataclass
 class ModelInfo:
-    """Information sur un modèle de langage."""
+    """Information on a language model."""
 
     id: str
     name: str
@@ -62,7 +62,7 @@ class ModelInfo:
 
 @dataclass
 class ModelsResponse:
-    """Réponse contenant la liste des modèles."""
+    """Answer containing the list of models."""
 
     object: Literal["list"] = "list"
     data: list[ModelInfo] = field(default_factory=list)
@@ -70,12 +70,12 @@ class ModelsResponse:
 
 @dataclass
 class ErrorResponse:
-    """Réponse d'erreur standardisée."""
+    """Standardized error response."""
 
     error: dict[str, str]
 
 
-# DTOs pour la validation automatique
+# DTOs for automatic validation
 ChatCompletionRequestDTO = DataclassDTO[ChatCompletionRequest]
 ChatCompletionResponseDTO = DataclassDTO[ChatCompletionResponse]
 ModelsResponseDTO = DataclassDTO[ModelsResponse]

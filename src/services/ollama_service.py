@@ -1,6 +1,6 @@
 import json
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Any, override
 
 from ollama import AsyncClient
 
@@ -16,16 +16,16 @@ from services.ai_service_interface import AIServiceInterface
 
 
 class OllamaService(AIServiceInterface):
-    """Service pour interagir avec Ollama."""
+    """Service to interact with Ollama."""
 
     available_models = ["qwen3:4b", "deepseek-r1:7b"]
     provider_name = "ollama"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = AsyncClient(host=OLLAMA_BASE_URL)
 
+    @override
     async def chat_completion(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
-        """Génère une réponse de chat completion via Ollama."""
         if request.model not in self.available_models:
             raise ValueError(f"Modèle '{request.model}' non disponible pour Ollama")
 
@@ -64,10 +64,10 @@ class OllamaService(AIServiceInterface):
             },
         )
 
+    @override
     async def chat_completion_stream(
         self, request: ChatCompletionRequest
     ) -> AsyncGenerator[str, Any]:
-        """Génère un stream de réponses de chat completion via Ollama."""
         if request.model not in self.available_models:
             raise ValueError(f"Modèle '{request.model}' non disponible pour Ollama")
 
@@ -115,8 +115,8 @@ class OllamaService(AIServiceInterface):
                 yield f"data: {json.dumps(final_chunk.__dict__, default=str)}\n\n"
                 yield "data: [DONE]\n\n"
 
+    @override
     def get_model_info(self) -> list[ModelInfo]:
-        """Retourne les informations des modèles Ollama."""
         return [
             ModelInfo(
                 id="qwen3:4b",
@@ -135,5 +135,5 @@ class OllamaService(AIServiceInterface):
         ]
 
     def _convert_messages(self, messages: list[ChatMessage]) -> list[dict[str, str]]:
-        """Convertit les messages au format Ollama."""
+        """Converts messages to Ollama format."""
         return [{"role": message.role, "content": message.content} for message in messages]

@@ -1,12 +1,12 @@
 [project]
-name = "aix"
+name = "ollaix"
 version = "0.1.0"
 description = "AI project "
 authors = [
-    {name = "Macktireh", email = "abdimack97@gmail.com"},
+    { name = "Macktireh", email = "abdimack97@gmail.com" }
 ]
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 requires-python = ">=3.13"
 dependencies = [
     "google-genai>=1.18.0",
@@ -17,19 +17,19 @@ dependencies = [
 
 [dependency-groups]
 lint = [
+    "ruff>=0.11.13",
 ]
 test = [
     "pytest>=8.4.0",
-    "pytest-cov>=6.2.0",
     "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.2.0",
 ]
 
 [tool.pdm.scripts]
-dev = {cmd = "litestar --app=src.main:app run --reload --host localhost", env = {PYTHONPATH = "src"}}
-test = {cmd = "pytest", env = {PYTHONPATH = "src", GEMINI_API_KEY = "test"}}
+dev = { cmd = "litestar --app=src.main:app run --reload --host localhost", env = { PYTHONPATH = "src" } }
+test = { cmd = "pytest", env = { PYTHONPATH = "src", GEMINI_API_KEY = "test" } }
 
 
-# Add pytest-asyncio configuration
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
@@ -81,5 +81,3 @@ select = [
 
 [tool.pdm]
 distribution = false
-
-

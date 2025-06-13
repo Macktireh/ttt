@@ -4,7 +4,7 @@ from litestar.exceptions import HTTPException, ImproperlyConfiguredException, Va
 
 from config.exception_handler import app_exception_handler
 from config.settings import openapi_config
-from controllers import chat_router
+from routes import routes
 
 
 @get("/health", summary="Health Check", description="Vérifie la santé de l'API", tags=["Health"])
@@ -16,7 +16,7 @@ cors_config = CORSConfig(allow_origins=["*"])
 
 
 app = Litestar(
-    route_handlers=[health_check, chat_router],
+    route_handlers=routes,
     openapi_config=openapi_config,
     debug=True,
     cors_config=cors_config,

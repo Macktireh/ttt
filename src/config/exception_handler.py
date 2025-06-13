@@ -25,6 +25,7 @@ def get_exception_detail(exc: ExceptionType) -> str:
 
 
 def app_exception_handler(request: Request, exc: ExceptionType) -> Response:
+    """Exception handler for the application."""
     status_code = get_http_status_code(exc)
     return Response(
         content={

@@ -2,7 +2,7 @@ import json
 from asyncio import sleep
 from collections.abc import AsyncGenerator
 from random import choice, randint, random
-from typing import Any
+from typing import Any, override
 
 from schemas.chat_schemas import (
     ChatCompletionRequest,
@@ -22,10 +22,8 @@ class DummyService(AIServiceInterface):
     available_models = ["dummy-model:1.0"]
     provider_name = "dummy"
 
+    @override
     async def chat_completion(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
-        """
-        Generates a dummy completion chat response.
-        """
         if request.model not in self.available_models:
             raise ValueError(f"Modèle '{request.model}' non disponible pour DummyService")
 
@@ -54,12 +52,10 @@ class DummyService(AIServiceInterface):
             },
         )
 
+    @override
     async def chat_completion_stream(
         self, request: ChatCompletionRequest
     ) -> AsyncGenerator[str, Any]:
-        """
-        Generates a dummy completion chat response stream.
-        """
         if request.model not in self.available_models:
             raise ValueError(f"Modèle '{request.model}' non disponible pour DummyService")
 
@@ -95,8 +91,8 @@ class DummyService(AIServiceInterface):
         yield f"data: {json.dumps(final_chunk.__dict__, default=str)}\n\n"
         yield "data: [DONE]\n\n"
 
+    @override
     def get_model_info(self) -> list[ModelInfo]:
-        """Returns dummy model information."""
         return [
             ModelInfo(
                 id="dummy-model:1.0",
